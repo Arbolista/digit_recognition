@@ -1,0 +1,48 @@
+{
+  "optimizer": "Adam", 
+  "iterations": 20000, 
+  "conv": {
+    "out": [
+      32, 
+      64, 
+      32
+    ], 
+    "max_pool_factors": [
+      7, 
+      2
+    ], 
+    "sizes": [
+      10, 
+      5, 
+      5
+    ]
+  }, 
+  "exp_name": "length_all", 
+  "learning_rate": {
+    "coefficient": 0.8, 
+    "start": 100.0, 
+    "decay": true
+  }, 
+  "l2_loss": {
+    "beta": 0.0001
+  }, 
+  "max_sequence_length": 5, 
+  "height": 280, 
+  "width": 280, 
+  "batch_size": 128, 
+  "n_classes": 5, 
+  "n_outputs": 1, 
+  "summary_step": 5, 
+  "fully_connected": {
+    "dropout": [
+      0.75
+    ], 
+    "relu": [
+      true
+    ], 
+    "out": [
+      64
+    ]
+  }, 
+  "notes": "Focusing on trying to get net to find large shapes and separate them."
+}

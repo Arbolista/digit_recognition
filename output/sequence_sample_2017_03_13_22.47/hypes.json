@@ -1,0 +1,55 @@
+{
+  "optimizer": "Adam", 
+  "iterations": 10000, 
+  "conv": {
+    "out": [
+      32, 
+      64, 
+      128
+    ], 
+    "max_pool_factors": [
+      2, 
+      2, 
+      2
+    ], 
+    "sizes": [
+      10, 
+      5, 
+      5
+    ]
+  }, 
+  "exp_name": "sequence_sample", 
+  "learning_rate": {
+    "coefficient": 0.9, 
+    "start": 0.1, 
+    "decay": true
+  }, 
+  "l2_loss": {
+    "beta": 0.0001
+  }, 
+  "max_sequence_length": 5, 
+  "height": 280, 
+  "width": 280, 
+  "batch_size": 128, 
+  "n_classes": 11, 
+  "n_outputs": 5, 
+  "summary_step": 5, 
+  "fully_connected": {
+    "dropout": [
+      false, 
+      false, 
+      0.75
+    ], 
+    "relu": [
+      false, 
+      false, 
+      true
+    ], 
+    "out": [
+      128, 
+      1024, 
+      64
+    ]
+  }, 
+  "notes": "Attempting to get whole sequence from single net architecture."
+}

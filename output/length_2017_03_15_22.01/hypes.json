@@ -1,0 +1,38 @@
+{
+  "fully_connected": {
+    "dropout": [
+      false, 
+      false, 
+      0.75
+    ], 
+    "relu": [
+      false, 
+      false, 
+      true
+    ], 
+    "out": [
+      32, 
+      64, 
+      128
+    ]
+  }, 
+  "optimizer": "Adam", 
+  "n_classes": 5, 
+  "conv": false, 
+  "exp_name": "length", 
+  "learning_rate": {
+    "coefficient": 0.96, 
+    "start": 0.01, 
+    "decay": true
+  }, 
+  "max_sequence_length": 5, 
+  "l2_loss": {
+    "beta": 0.001
+  }, 
+  "width": 280, 
+  "batch_size": 128, 
+  "iterations": 10000, 
+  "n_outputs": 1, 
+  "summary_step": 5, 
+  "height": 280
+}

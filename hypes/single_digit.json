@@ -1,0 +1,30 @@
+{
+  "optimizer": "Adam",
+  "iterations": 20000,
+  "conv": {
+    "sizes": [5, 5],
+    "out": [32, 64],
+    "max_pool_factors": [2, 2]
+  },
+  "exp_name": "single_digit",
+  "learning_rate": {
+    "coefficient": 0.96,
+    "start": 0.001,
+    "decay": false
+  },
+  "l2_loss": {
+    "beta": 0.0001
+  },
+  "max_sequence_length": 5,
+  "height": 28,
+  "width": 28,
+  "batch_size": 128,
+  "n_classes": 10,
+  "n_outputs": 1,
+  "summary_step": 5,
+  "fully_connected": {
+    "dropout": [0.75],
+    "relu": [true],
+    "out": [1024]
+  }
+}
