@@ -28,7 +28,7 @@ def conv_net(x, config, weights, biases, max_pool_factors):
   # Convolution Layer
   for i in range(len(weights)):
     convi = conv2d(convs[i], weights[i], biases[i])
-    if len(max_pool_factors) - 1 >= i and max_pool_factors[i]:
+    if len(max_pool_factors) - 1 >= i and max_pool_factors[i] != 1:
       convi = maxpool2d(convi, k=max_pool_factors[i])
     convs.append(convi)
 
@@ -73,10 +73,10 @@ class NeuralNet:
     if config['conv']:
       for i in range(len(config['conv']['sizes'])):
         weights['conv'].append(
-          tf.Variable(tf.random_normal([config['conv']['sizes'][i], config['conv']['sizes'][i], n_in, config['conv']['out'][i]]))
+          tf.Variable(tf.random_normal([config['conv']['sizes'][i], config['conv']['sizes'][i], n_in, config['conv']['out'][i]], stddev=config['weights']['stddev']))
         )
         biases['conv'].append(
-          tf.Variable(tf.random_normal([config['conv']['out'][i]]))
+          tf.Variable(tf.random_normal([config['conv']['out'][i]], stddev=config['biases']['stddev']))
         )
         n_in = config['conv']['out'][i]
       max_pooled_area = reduce(lambda x, y: x/float(np.square(y)), [config['width'] * config['height']] + config['conv']['max_pool_factors'])
@@ -86,17 +86,17 @@ class NeuralNet:
 
     for i in range(len(config['fully_connected']['out'])):
       weights['fc'].append(
-        tf.Variable(tf.random_normal([n_in, config['fully_connected']['out'][i]]))
+        tf.Variable(tf.random_normal([n_in, config['fully_connected']['out'][i]], stddev=config['weights']['stddev']))
       )
       biases['fc'].append(
-        tf.Variable(tf.random_normal([config['fully_connected']['out'][i]]))
+        tf.Variable(tf.random_normal([config['fully_connected']['out'][i]], stddev=config['biases']['stddev']))
       )
       n_in = config['fully_connected']['out'][i]
     weights['fc'].append(
-      tf.Variable(tf.random_normal([n_in, config['n_outputs'] * config['n_classes']]))
+      tf.Variable(tf.random_normal([n_in, config['n_outputs'] * config['n_classes']], stddev=config['weights']['stddev']))
     )
     biases['fc'].append(
-      tf.Variable(tf.random_normal([config['n_outputs'] * config['n_classes']]))
+      tf.Variable(tf.random_normal([config['n_outputs'] * config['n_classes']], stddev=config['biases']['stddev']))
     )
     return weights, biases
 
@@ -116,10 +116,11 @@ class NeuralNet:
       else:
         logits = fully_connected(X, config, weights['fc'], biases['fc'], self.training)
 
-      self.Y = Y = tf.placeholder(tf.int32, [None, config['n_outputs']])
       n_classes = config['n_classes']
+      self.Y = Y = tf.placeholder(tf.int32, [None, config['n_outputs']])
+      Yhot = tf.one_hot(Y, n_classes)
       logits = tf.reshape(logits, [-1, config['n_outputs'], n_classes])
-      logit_loss = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=Y))
+      logit_loss = self.logit_loss(logits, Yhot)
 
       if config['l2_loss']:
         if config['conv']:
@@ -131,13 +132,18 @@ class NeuralNet:
       else:
         l2_loss = tf.constant(0.)
 
-      self.cost = cost = tf.add(logit_loss, l2_loss)
+      self.cost = cost = logit_loss #tf.add(logit_loss, l2_loss)
       tf.summary.scalar('cost', cost)
 
       self.pred = pred = tf.argmax(logits, axis=2)
+
       correct = tf.cast(tf.equal(tf.cast(pred, tf.int32), Y), tf.float32)
-      self.accuracy = accuracy = tf.reduce_mean(correct)
-      tf.summary.scalar('accuracy', accuracy)
+      correct_sequence = tf.cast(tf.equal(tf.reduce_sum(correct, 1), config['n_outputs']), tf.float32)
+
+      self.accuracy = accuracy = tf.reduce_mean(correct_sequence)
+      self.element_accuracy = element_accuracy = tf.reduce_mean(correct)
+      tf.summary.scalar('set_accuracy', accuracy)
+      tf.summary.scalar('element_accuracy', element_accuracy)
 
       self.global_step = global_step = tf.placeholder(tf.int32)
 
@@ -148,7 +154,7 @@ class NeuralNet:
       tf.summary.scalar('learning_rate', learning_rate)
 
       if config['optimizer'] == 'Adam':
-        self.optimizer = optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+        self.optimizer = optimizer = tf.train.AdamOptimizer(learning_rate).minimize(logit_loss)
       elif config['optimizer'] == 'GradientDescent':
         self.optimizer = optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
 
@@ -164,6 +170,16 @@ class NeuralNet:
       with open(dirname + '/hypes.json', 'w') as f:
           json.dump(config, f, indent=2)
 
+  def logit_loss(self, logits, labels):
+    config = self.config
+    losses = []
+    for i in range(config['n_outputs']):
+      logitsi = tf.reshape(tf.slice(logits, [0, i, 0], [-1, 1, -1]), [-1, config['n_classes']])
+      labelsi = tf.reshape(tf.slice(labels, [0, i, 0], [-1, 1, -1]), [-1, config['n_classes']])
+      lossi = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logitsi, labels=labelsi))
+      losses.append(lossi)
+    return tf.add_n(losses)
+
   def train(self, images, labels, validation_images, validation_labels):
     config = self.config
     # Launch the graph
@@ -176,7 +192,6 @@ class NeuralNet:
       # Keep training until reach max iterations
       while step * batch_size < config['iterations']:
         #while (len(losses) <= 3 or losses[-3] > losses[-1]) and step * batch_size < training_iters:
-        print('---'+str(step)+'----')
         if (step * batch_size) % float(len(images)) <= batch_size:
           print('shuffling...')
           images, labels = shuffle(images, labels)
@@ -191,10 +206,16 @@ class NeuralNet:
         # Display logs per epoch step
         if step % config['summary_step'] == 0:
           feed_dict = self.feed_dict(batch_x, batch_y, False, step)
-          summary, c, accuracy = sess.run([self.summary, self.cost, self.accuracy], feed_dict=feed_dict)
+          summary, c, accuracy, element_accuracy = sess.run([
+            self.summary,
+            self.cost,
+            self.accuracy,
+            self.element_accuracy
+          ], feed_dict=feed_dict)
           losses.append(c)
           print("Step:", '%04d' % (step), "cost=", "{:.9f}".format(c))
-          print('Accuracy', accuracy)
+          print("Set Accuracy= {:.9f}".format(accuracy))
+          print("Element Accuracy= {:.9f}".format(element_accuracy))
         step += 1
       print("Optimization Finished!")
       feed_dict = self.feed_dict(validation_images, validation_labels, False, 1)

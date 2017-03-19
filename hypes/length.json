@@ -1,30 +1,39 @@
 {
-  "optimizer": "Adam",
+  "optimizer": "GradientDescent",
+  "dataset_size": 11,
   "iterations": 20000,
   "conv": {
-    "sizes": [15, 5],
-    "out": [32, 128],
-    "max_pool_factors": [2, 2]
+    "sizes": [5, 5, 5, 5, 5, 5, 5],
+    "out": [48, 76, 104, 104, 132, 132, 160],
+    "max_pool_factors": [2, 2, 1, 1, 2, 1, 1]
   },
   "exp_name": "length_all",
   "learning_rate": {
     "coefficient": 0.96,
-    "start": 0.0001,
+    "start": 100.0,
     "decay": false
   },
   "l2_loss": {
     "beta": 0.0001
   },
   "max_sequence_length": 5,
-  "height": 280,
-  "width": 280,
+  "height": 56,
+  "width": 56,
   "batch_size": 128,
-  "n_classes": 10,
+  "n_classes": 5,
   "n_outputs": 1,
   "summary_step": 5,
   "fully_connected": {
     "dropout": [0.75],
     "relu": [true],
     "out": [1024]
+  },
+  "weights": {
+    "stddev": 0.0001
+  },
+  "biases": {
+    "stddev": 0.0001
   }
 }
+
+

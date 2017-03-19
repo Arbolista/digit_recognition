@@ -1,0 +1,54 @@
+{
+  "optimizer": "Adam", 
+  "iterations": 20000, 
+  "conv": {
+    "out": [
+      48, 
+      76, 
+      104, 
+      132, 
+      160
+    ], 
+    "max_pool_factors": [
+      2, 
+      2, 
+      1, 
+      1, 
+      2
+    ], 
+    "sizes": [
+      10, 
+      5, 
+      5, 
+      5, 
+      5
+    ]
+  }, 
+  "dataset_size": 1, 
+  "exp_name": "sequence_shrunk_limited", 
+  "learning_rate": {
+    "coefficient": 0.75, 
+    "start": 1.0, 
+    "decay": false
+  }, 
+  "l2_loss": false, 
+  "max_sequence_length": 5, 
+  "height": 56, 
+  "width": 56, 
+  "batch_size": 128, 
+  "n_classes": 11, 
+  "n_outputs": 5, 
+  "summary_step": 5, 
+  "fully_connected": {
+    "dropout": [
+      false
+    ], 
+    "relu": [
+      false
+    ], 
+    "out": [
+      64
+    ]
+  }, 
+  "notes": "Trying with one hot encoded."
+}

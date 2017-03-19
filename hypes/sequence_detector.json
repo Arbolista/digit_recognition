@@ -1,31 +1,38 @@
 {
-  "max_sequence_length": 5,
-  "exp_name": "sequence_full",
-  "width": 280,
-  "height": 280,
-  "n_classes": 11,
-  "n_outputs": 5,
   "optimizer": "Adam",
-  "summary_step": 5,
-  "learning_rate": {
-    "start":  0.5,
-    "decay": true,
-    "coefficient": 0.75
-  },
-  "iterations": 10000,
-  "batch_size": 128,
+  "iterations": 20000,
+  "dataset_size": 11,
   "conv": {
-    "sizes": [10, 5, 5],
-    "out": [32, 64, 128],
-    "max_pool_factors": [2, 2, 2]
+    "sizes": [5, 5, 5, 5, 5, 5, 5],
+    "out": [32, 32, 64, 64, 128, 64, 64],
+    "max_pool_factors": [2, 2, 1, 2, 1, 1, 1]
   },
-  "fully_connected": {
-    "out": [128, 1024, 64],
-    "relu": [false, false, true],
-    "dropout": [false, false, 0.75]
+  "exp_name": "sequence_shrunk",
+  "learning_rate": {
+    "coefficient": 0.80,
+    "start": 0.1,
+    "decay": false
   },
   "l2_loss": {
     "beta": 0.0001
   },
-  "notes": "Attempting to get whole sequence from single net architecture."
+  "max_sequence_length": 5,
+  "width": 56,
+  "height": 56,
+  "n_classes": 11,
+  "n_outputs": 5,
+  "batch_size": 128,
+  "summary_step": 5,
+  "fully_connected": {
+    "dropout": [false, 0.75],
+    "relu": [false, true],
+    "out": [1024, 4096]
+  },
+  "weights": {
+    "stddev": 1.0
+  },
+  "biases": {
+    "stddev": 1.0
+  }
 }
+

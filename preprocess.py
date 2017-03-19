@@ -268,7 +268,7 @@ class Preprocess:
 
     return img
 
-  def wrap_sequence(self, sequence, bboxes, shape=(28*5*2, 28*5*2), permitted_hanging=1, interpolation=cv2.INTER_LINEAR):
+  def wrap_sequence(self, sequence, bboxes, shape=(28*5, 28*5), permitted_hanging=1, interpolation=cv2.INTER_LINEAR):
     top = np.round(np.random.rand() * (shape[0] + permitted_hanging - sequence.shape[0]))
     left = np.round(np.random.rand() * (shape[1] + permitted_hanging - sequence.shape[1]))
 
@@ -285,7 +285,10 @@ class Preprocess:
     canvas = np.zeros(shape)
     canvas[top:(top+sequence.shape[0]), left:(left+sequence.shape[1])] = sequence
 
-    return canvas, bboxes.astype(int)
+    canvas = cv2.resize(canvas, None, fx=0.4, fy=0.4)
+    bboxes = np.round(bboxes * 0.4).astype(int)
+
+    return canvas, bboxes
 
   def set_horizontal_axis(self, images):
     max_height = max(image.shape[0] for image in images)

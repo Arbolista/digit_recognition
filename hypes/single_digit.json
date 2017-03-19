@@ -2,14 +2,14 @@
   "optimizer": "Adam",
   "iterations": 20000,
   "conv": {
-    "sizes": [5, 5],
-    "out": [32, 64],
+    "sizes": [5, 5, 5, 5],
+    "out": [32, 64, 64, 128],
     "max_pool_factors": [2, 2]
   },
   "exp_name": "single_digit",
   "learning_rate": {
-    "coefficient": 0.96,
-    "start": 0.001,
+    "coefficient": 0.80,
+    "start": 0.005,
     "decay": false
   },
   "l2_loss": {
@@ -23,8 +23,14 @@
   "n_outputs": 1,
   "summary_step": 5,
   "fully_connected": {
-    "dropout": [0.75],
-    "relu": [true],
-    "out": [1024]
+    "dropout": [false, 0.75],
+    "relu": [false, true],
+    "out": [1024, 4096]
+  },
+  "weights": {
+    "stddev": 1.0
+  },
+  "biases": {
+    "stddev": 1.0
   }
 }
